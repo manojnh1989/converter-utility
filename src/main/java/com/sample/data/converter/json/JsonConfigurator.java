@@ -21,6 +21,7 @@ public class JsonConfigurator {
 		configuratorMap.put("name", "employeeDetails#object.name#key");
 		configuratorMap.put("addresses.stName", "employeeDetails#object.addresses#array.#object.stName#key");
 		configuratorMap.put("addresses.houseNum", "employeeDetails#object.addresses#array.#object.houseNum#key");
+		configuratorMap.put("phoneNumbers", "employeeDetails#object.phoneNumbers#array.#value");
 	}
 	
 	public Map<String, String> getConfiguratorMap() {

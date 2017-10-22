@@ -1,18 +1,14 @@
 package com.sample.data.converter.json.utility;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -23,11 +19,7 @@ import com.sample.data.converter.json.JsonConfigurator;
 import com.sample.data.converter.json.schema.Address;
 import com.sample.data.converter.json.schema.Employee;
 
-//@Component(value = DataConverterType.JSON_CONVERTER)
-@SpringBootApplication
-@ComponentScan(basePackages = "com.sample.data.converter.json")
-@EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
-		DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
+@Component
 public class JsonConverter implements DataConverter {
 
 	private JsonConfigurator jsonConfigurator;
@@ -35,10 +27,6 @@ public class JsonConverter implements DataConverter {
 	@Autowired
 	public JsonConverter(JsonConfigurator jsonConfigurator) {
 		this.jsonConfigurator = jsonConfigurator;
-	}
-
-	public static void main(String[] args) {
-		SpringApplication.run(JsonConverter.class, args);
 	}
 
 	@PostConstruct
@@ -57,13 +45,25 @@ public class JsonConverter implements DataConverter {
 		addresses[1] = new Address();
 		addresses[1].setStName("asfdasf");
 		addresses[1].setHouseNum(123456);
+		
+		List<String> phoneNumbers = new ArrayList<>();
+		phoneNumbers.add("+91-9*******");
+		phoneNumbers.add("+91-95327467");
+		
+		emp.setPhoneNumbers(phoneNumbers);
 
 		emp.setAddresses(addresses);
 
 		JsonElement srcJson = new Gson().toJsonTree(emp);
+		
+		JsonObject jsonObject = new JsonObject();
 
-		traverseSrcJson(srcJson, new JsonObject(),
+		traverseSrcJson(srcJson, jsonObject,
 				new JsonConverterMetaContext.Builder().index(0).srcFormat("").build());
+		
+		System.out.println("Print" + jsonObject.toString());
+		
+		
 
 	}
 
@@ -126,10 +126,10 @@ public class JsonConverter implements DataConverter {
 				if (StringUtils.endsWith(strKey, "#value") || StringUtils.endsWith(strKey, "#key"))
 
 					jsonElement = formDestJson(jsonElement, new JsonConverterMetaContext.Builder().destFormat(strKey)
-							.primitiveSrcJsonElem(srcJson).build());
+							.primitiveSrcJsonElem(srcJson).index(context.getIndex()).build());
 				else
 					jsonElement = formDestJson(jsonElement,
-							new JsonConverterMetaContext.Builder().destFormat(strKey).build());
+							new JsonConverterMetaContext.Builder().destFormat(strKey).index(context.getIndex()).build());
 
 			}
 
@@ -239,7 +239,7 @@ public class JsonConverter implements DataConverter {
 				// Check if the object exists.
 				JsonArray parentObject = (JsonArray) parentJsonElement;
 
-				if (index <= parentObject.size()) {
+				if (index < parentObject.size()) {
 					return parentObject.get(index);
 				} else {
 
@@ -360,11 +360,5 @@ public class JsonConverter implements DataConverter {
 		}
 
 	}
-
-	// public void formOutputJson(String ) {
-	//
-	//
-	//
-	// }
 
 }
